@@ -1,0 +1,11 @@
+apiVersion: v2
+name: opentelemetry-collector
+description: Opentelemetry Collector receives data, process and send to Elastic APM
+
+type: application
+
+# Versão do chart
+version: v1
+
+# Versão da aplicação
+appVersion: "1.0.0"

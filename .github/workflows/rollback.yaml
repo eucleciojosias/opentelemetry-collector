@@ -1,0 +1,25 @@
+name: Rollback
+on:
+  workflow_dispatch:
+
+env:
+  REPOSITORY: keycloak
+
+jobs:
+  rollback:
+    name: Rollback Operation
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.6.1
+        with:
+          role-to-assume: ${{ secrets.EKS_PIPELINE_ROLE }}
+          aws-region: ${{ secrets.EKS_REGION }}
+          mask-aws-account-id: "no"
+
+      - name: Rollback Application
+        uses: betrybe/trybe-eks-rollback@main
+        with:
+          clusterName: ${{ secrets.EKS_CLUSTER_PRODUCTION }}  # obrigatório
+          awsRegion: ${{ secrets.EKS_REGION }}  # obrigatório

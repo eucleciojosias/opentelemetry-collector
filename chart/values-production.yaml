@@ -1,0 +1,7 @@
+environmentVariables:
+  ENV: "production"
+
+ingressRoute:
+  routes:
+    - kind: Rule
+      match: Host(`opentelemetry-collector.betrybe.com`)

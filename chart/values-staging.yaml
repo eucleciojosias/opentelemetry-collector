@@ -1,0 +1,11 @@
+environmentVariables:
+  ENV: "staging"
+  PROXY_ADDRESS_FORWARDING: true
+
+dashboards:
+  enabled: false
+
+ingressRoute:
+  routes:
+    - kind: Rule
+      match: Host(`opentelemetry-collector.betrybe.dev`)

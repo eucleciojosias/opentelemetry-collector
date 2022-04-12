@@ -1,0 +1,43 @@
+name: Deploy to Staging
+on:
+  push:
+    # branches: staging
+
+env:
+  REPOSITORY: keycloak
+
+jobs:
+  ci:
+    environment: staging
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Bootstrap
+        uses: betrybe/trybe-bootstrap-action@main
+        with:
+          environment: staging
+          token: ${{ secrets.BOOTSTRAP_TOKEN }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.6.1
+        with:
+          role-to-assume: ${{ secrets.EKS_PIPELINE_ROLE }}
+          aws-region: ${{ secrets.EKS_REGION }}
+          mask-aws-account-id: 'no'
+
+      - name: Gets OpenTelemetry Docker Image
+        shell: bash
+        run: |
+          echo "REPOSITORY_URI=otel/opentelemetry-collector" >> $GITHUB_ENV
+          echo "IMAGE_TAG=0.18.0" >> $GITHUB_ENV
+
+      - name: Deploy to EKS
+        uses: betrybe/trybe-eks-deploy@main
+
+        with:
+          clusterName: ${{ secrets.EKS_CLUSTER_STAGING }} # obrigatório
+          awsRegion: ${{ secrets.EKS_REGION }} # obrigatório
