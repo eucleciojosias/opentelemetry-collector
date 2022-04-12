@@ -1,0 +1,131 @@
+replicaCount: 1
+containerPort: 8080
+
+image:
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingressRoute:
+  enabled: true
+  annotations: {}
+  entryPoints:
+    - websecure
+
+dashboards:
+  enabled: false
+  labelKey: grafana_dashboard
+  annotations: {}
+
+args: [
+  "--config=/opentelemetry-collector-exporter-elastic.yaml"
+]
+
+# Getting HTTP 200 from this path indicates that the container is **healthy**.
+livenessProbePath: /
+
+# Getting HTTP 200 from this path indicates that the container is **ready to receive traffic**.
+readnessProbePath: /
+
+# Delay to start checking for liveness and readness, usefull
+# for applications that take some time to actually start.
+initialDelaySeconds: 180
+
+# Usefull for running migrations before starting the app.
+executeBeforeStart:
+  enabled: false
+  command: ["echo", "hello"]
+
+
+# Requests: K8s will reserve, at minimum, this amount of CPU/RAM exclusively to your app.
+# Limits: If your app exceeds this values, you app will be OMM killed.
+resources:
+  limits:
+    cpu: 1500m
+    memory: 1Gi
+  requests:
+    cpu: 1000m
+    memory: 500Mi
+
+# Enable autoscaling for your app here!
+# We use Horizontal Pod Autoscaler to provide more replicas of your app.
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Pod Disruption Budget
+# Tells Kubernetes how many pods must be available in case of maintenance events.
+# WARNING: If enabled, minAvailable must be LESS than replicaCount/minReplicas!
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+
+# ServiceAccounts are mainly used to attach a IAM Role to a given pod.
+# https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod Annotations are used to guide applications that need to perform some actions
+# on pods. In the example below, Filebeat reads the "co.elastic.logs" annotations
+# in order to process multiline logs correctly.
+podAnnotations: {}
+  # Elixir applications must uncomment this section.
+  # co.elastic.logs/multiline.pattern: '^[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}'
+  # co.elastic.logs/multiline.negate: "true"
+  # co.elastic.logs/multiline.match: after
+
+# Erlang Nodes Mode
+# Switch to 'true' when using multiple pods on a Elixir application.
+erlangNodesMode:
+  enabled: false
+
+# CronJobs
+# List of cronjobs to be created and maintained by Kubernetes itself.
+# Field 'endpoint' must start with a forward slash and can only access this project.
+cronJobs:
+  - name: My amazing CronJob for every minute
+    enabled: false
+    schedule: "* * * * *"
+    endpoint: /path-to-hit/
+  - name: My amazing CronJob for every hour
+    enabled: false
+    schedule: "0 * * * *"
+    endpoint: /path-to-hit/
+
+# ------------
+# The settings below is for advanced Helm and Kubernetes users only.
+# ------------
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+nameOverride: ""
+
+fullnameOverride: ""
+
+extraContainers: []
+
+environmentVariables: {}
+
+secrets: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
